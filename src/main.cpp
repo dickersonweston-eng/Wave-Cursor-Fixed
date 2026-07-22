@@ -13,6 +13,21 @@ using namespace geode::prelude;
 #include <CoreGraphics/CoreGraphics.h>
 #endif
 
+#ifdef GEODE_IS_MACOS
+extern "C" void platformHideCursorNS();
+extern "C" void platformShowCursorNS();
+#endif
+void createCursorNodes();
+#ifdef GEODE_IS_MACOS
+void onAppBecameActive() {
+    createCursorNodes();
+    platformShowCursorNS();
+    if (!Mod::get()->getSettingValue<bool>("show-cursor")) {
+        platformHideCursorNS();
+    }
+}
+#endif
+
 void refreshCursorAppearance() {
     auto cursor = static_cast<SimplePlayer*>(OverlayManager::get()->getChildByIDRecursive("cursor-icon"_spr));
     if (!cursor) return;
@@ -50,11 +65,38 @@ void refreshTrail() {
     overlay->addChild(trail);
 }
 
+void createCursorNodes() {
+    auto overlay = OverlayManager::get();
+
+    auto existingCursor = overlay->getChildByID("cursor"_spr);
+    if (existingCursor) existingCursor->removeFromParent();
+
+    auto existingTrail = overlay->getChildByID("cursor-trail"_spr);
+    if (existingTrail) existingTrail->removeFromParent();
+
+    auto cursorIcon = SimplePlayer::create(0);
+    cursorIcon->setID("cursor-icon"_spr);
+
+    auto cursor = CCNode::create();
+    cursor->addChild(cursorIcon);
+    cursor->setContentSize(cursorIcon->m_outlineSprite->getScaledContentSize());
+    cursorIcon->setPosition(cursor->getContentSize() / 2);
+    cursor->setAnchorPoint({0.77f, 0.5f});
+    cursor->setRotation(240.f);
+    cursor->setID("cursor"_spr);
+    cursor->setZOrder(10067);
+    overlay->addChild(cursor);
+
+    refreshCursorAppearance();
+    refreshTrail();
+}
+
 class BasicScheduler : public CCObject {
     int m_hideCounter = 0;
 public:
     void update(float dt) {
         auto cursor = static_cast<CCNode*>(OverlayManager::get()->getChildByID("cursor"_spr));
+
         auto trail = static_cast<CCMotionStreak*>(OverlayManager::get()->getChildByID("cursor-trail"_spr));
         if (!cursor) return;
 
@@ -75,9 +117,9 @@ public:
         m_hideCounter++;
         if (m_hideCounter >= 300) {
             m_hideCounter = 0;
-            CGDisplayShowCursor(kCGDirectMainDisplay);
+            platformShowCursorNS();
             if (!Mod::get()->getSettingValue<bool>("show-cursor")) {
-                CGDisplayHideCursor(kCGDirectMainDisplay);
+                platformHideCursorNS();
             }
         }
     #endif
@@ -85,25 +127,11 @@ public:
 };
 
 $execute {
-    auto cursorIcon = SimplePlayer::create(0);
-    cursorIcon->setID("cursor-icon"_spr);
-
-    auto cursor = CCNode::create();
-    cursor->addChild(cursorIcon);
-    cursor->setContentSize(cursorIcon->m_outlineSprite->getScaledContentSize());
-    cursorIcon->setPosition(cursor->getContentSize() / 2);
-    cursor->setAnchorPoint({0.77f, 0.5f});
-    cursor->setRotation(240.f);
-    cursor->setID("cursor"_spr);
-    cursor->setZOrder(10067);
-    OverlayManager::get()->addChild(cursor);
-
-    refreshCursorAppearance();
-    refreshTrail();
+    createCursorNodes();
 
 #ifdef GEODE_IS_MACOS
     if (!Mod::get()->getSettingValue<bool>("show-cursor")) {
-        CGDisplayHideCursor(kCGDirectMainDisplay);
+        platformHideCursorNS();
     }
 #endif
 
@@ -121,9 +149,9 @@ $execute {
     listenForSettingChanges<bool>("show-cursor", [](bool value) {
     #ifdef GEODE_IS_MACOS
         if (value) {
-            CGDisplayShowCursor(kCGDirectMainDisplay);
+            platformShowCursorNS();
         } else {
-            CGDisplayHideCursor(kCGDirectMainDisplay);
+            platformHideCursorNS();
         }
     #endif
     });
@@ -131,4 +159,9 @@ $execute {
 
 $on_game(Loaded) {
     refreshCursorAppearance();
+}
+
+$on_game(TexturesLoaded) {
+    refreshCursorAppearance();
+    refreshTrail();
 }
