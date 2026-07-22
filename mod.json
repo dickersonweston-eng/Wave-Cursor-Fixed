@@ -35,6 +35,7 @@
         }
     },
     "links": {
-        "community": "https://discord.gg/KwyC3c7bcP"
+        "community": "https://discord.gg/KwyC3c7bcP",
+        "source": "https://github.com/dickersonweston-eng/Wave-Cursor-Fixed"
     }
 }
