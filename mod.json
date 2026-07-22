@@ -1,0 +1,40 @@
+{
+    "geode": "5.7.1",
+    "gd": {
+        "win": "2.2081",
+        "mac": "2.2081"
+    },
+    "version": "v1.0.0",
+    "id": "kreongd.wavecursorfixed",
+    "name": "Wave Cursor Fixed",
+    "developer": "KreonGD",
+    "description": "This mod is a fixed version of the Wave Cursor mod",
+    "settings": {
+        "enable-trail": {
+            "type": "bool",
+            "name": "Enable Trail",
+            "description": "Show a trail effect following the cursor",
+            "default": true
+        },
+        "cursor-size": {
+            "type": "int",
+            "name": "Cursor Size",
+            "description": "How large the cursor icon appears",
+            "default": 55,
+            "min": 40,
+            "max": 90,
+            "control": {
+                "slider": true
+            }
+        },
+        "show-cursor": {
+            "type": "bool",
+            "name": "Show Cursor",
+            "description": "Keep the normal system cursor visible alongside the wave icon",
+            "default": false
+        }
+    },
+    "links": {
+        "community": "https://discord.gg/KwyC3c7bcP"
+    }
+}
