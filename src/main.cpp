@@ -8,6 +8,8 @@ using namespace geode::prelude;
 #include <Geode/ui/OverlayManager.hpp>
 #include <Geode/cocos/textures/CCTextureCache.h>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/modify/GJGarageLayer.hpp>
+#include <Geode/modify/CharacterColorPage.hpp>
 
 #ifdef GEODE_IS_MACOS
 #include <CoreGraphics/CoreGraphics.h>
@@ -44,6 +46,25 @@ void refreshCursorAppearance() {
 
     cursor->setScale(Mod::get()->getSettingValue<int>("cursor-size") / 100.f);
 }
+
+class $modify(GJGarageLayer) {
+    void onSelect(CCObject* sender) {
+        GJGarageLayer::onSelect(sender);
+        refreshCursorAppearance();
+    }
+};
+
+class $modify(CharacterColorPage) {
+    void onPlayerColor(CCObject* sender) {
+        CharacterColorPage::onPlayerColor(sender);
+        refreshCursorAppearance();
+    }
+
+    void toggleGlow(CCObject* sender) {
+        CharacterColorPage::toggleGlow(sender);
+        refreshCursorAppearance();
+    }
+};
 void refreshTrail() {
     auto overlay = OverlayManager::get();
     auto existing = overlay->getChildByID("cursor-trail"_spr);
@@ -95,12 +116,16 @@ class BasicScheduler : public CCObject {
     int m_hideCounter = 0;
 public:
     void update(float dt) {
+        if (auto scene = CCDirector::sharedDirector()->getRunningScene()) {
+            scene->reorderChild(OverlayManager::get(), 2000000000);
+        }
         auto cursor = static_cast<CCNode*>(OverlayManager::get()->getChildByID("cursor"_spr));
 
         auto trail = static_cast<CCMotionStreak*>(OverlayManager::get()->getChildByID("cursor-trail"_spr));
         if (!cursor) return;
 
-        bool showCursor = PlayLayer::get() == nullptr;
+        auto pl = PlayLayer::get();
+        bool showCursor = (pl == nullptr) || pl->m_isPaused;
 
         cursor->setPosition(geode::cocos::getMousePos());
         cursor->setVisible(showCursor);
@@ -113,7 +138,7 @@ public:
             trail->setVisible(showCursor);
         }
 
-    #ifdef GEODE_IS_MACOS
+#ifdef GEODE_IS_MACOS
         m_hideCounter++;
         if (m_hideCounter >= 300) {
             m_hideCounter = 0;
