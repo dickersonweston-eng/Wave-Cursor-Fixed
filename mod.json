@@ -4,11 +4,11 @@
         "win": "2.2081",
         "mac": "2.2081"
     },
-    "version": "v1.1.1",
+    "version": "v1.1.2",
     "id": "kreongd.wavecursorfixed",
     "name": "Wave Cursor Fixed",
     "developer": "KreonGD",
-    "description": "This mod is a fixed version of the Wave Cursor mod",
+    "description": "A fixed version of the Wave Cursor mod",
     "settings": {
         "enable-trail": {
             "type": "bool",

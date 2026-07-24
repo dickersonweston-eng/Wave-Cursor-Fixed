@@ -1,3 +1,6 @@
+# v1.1.2
+- Fixed cursor staying hidden on level complete screen
+
 # v1.1.1
 - Added compatibility with real time icon, color, and glow changes
 - Fixed cursor not showing on pause menu

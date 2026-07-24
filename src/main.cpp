@@ -125,7 +125,7 @@ public:
         if (!cursor) return;
 
         auto pl = PlayLayer::get();
-        bool showCursor = (pl == nullptr) || pl->m_isPaused;
+        bool showCursor = (pl == nullptr) || pl->m_isPaused || pl->m_hasCompletedLevel;
 
         cursor->setPosition(geode::cocos::getMousePos());
         cursor->setVisible(showCursor);
